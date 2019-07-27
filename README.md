@@ -1,2 +1,2 @@
 # pygame_test
-Learn to use pygame
+A personal project for learning how to use pygame.
