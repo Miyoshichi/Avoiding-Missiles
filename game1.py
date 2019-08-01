@@ -1,60 +1,113 @@
 import pygame
 from pygame.locals import *
 from sys import exit
+import random
 
 # Color defination
 white = (255, 255, 255)
 black = (0, 0, 0)
+grey = (192, 192, 192)
 skyblue = (135, 206, 250)
+orange = (255, 183, 76)
 
 
 # Class defination
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         super(Player, self).__init__()
-        self.surf = pygame.Surface((20, 20))
-        self.surf.fill(white)
+        self.surf = pygame.Surface((80, 20))
+        self.surf.fill(grey)
         self.rect = self.surf.get_rect()
 
     def update(self, pressed_keys):
-        self.d = 10
+        self.speed = 10
         if pressed_keys[K_UP]:
-            self.rect.move_ip(0, -self.d)
-            print('up pressed')
+            self.rect.move_ip(0, -self.speed)
+            # print('up pressed')
         if pressed_keys[K_DOWN]:
-            self.rect.move_ip(0, self.d)
-            print('down pressed')
+            self.rect.move_ip(0, self.speed)
+            # print('down pressed')
         if pressed_keys[K_LEFT]:
-            self.rect.move_ip(-self.d, 0)
-            print('left pressed')
+            self.rect.move_ip(-self.speed, 0)
+            # print('left pressed')
         if pressed_keys[K_RIGHT]:
-            self.rect.move_ip(self.d, 0)
-            print('right pressed')
+            self.rect.move_ip(self.speed, 0)
+            # print('right pressed')
+        if self.rect.left < 0:
+            self.rect.left = 0
+        elif self.rect.right > 1080:
+            self.rect.right = 1080
+        if self.rect.top < 0:
+            self.rect.top = 0
+        elif self.rect.bottom > 720:
+            self.rect.bottom = 720
+
+
+class Enemy(pygame.sprite.Sprite):
+    def __init__(self):
+        super(Enemy, self).__init__()
+        self.surf = pygame.Surface((40, 10))
+        self.surf.fill(orange)
+        self.rect = self.surf.get_rect(center=(1120, random.randint(21, 700)))
+        self.speed = random.randint(5, 20)
+
+    def update(self):
+        self.rect.move_ip(-self.speed, 0)
+        if self.rect.right < 0:
+            self.kill()
 
 # Objects initialization
 pygame.init()
+pygame.display.set_caption('Avoiding Missiles')
 screen = pygame.display.set_mode((1080, 720))
 screen.fill(black)
 bg = pygame.Surface(screen.get_size())
 bg.fill(skyblue)
 player = Player()
 clock = pygame.time.Clock()
+life = 3
+
+# Groups
+enemies = pygame.sprite.Group()
+all_sprites = pygame.sprite.Group()
+all_sprites.add(player)
+
+# Event
+ADD_ENEMY = pygame.USEREVENT + 1
+pygame.time.set_timer(ADD_ENEMY, 250)
 
 # Main Window
 while 1:
-    for event in pygame.event.get():
-        if event.type == QUIT:
-            exit()
-
-# Move
-    pressed_keys = pygame.key.get_pressed()
-    player.update(pressed_keys)
-
-# Visualization
-    screen.blit(bg, (0, 0))
-    screen.blit(player.surf, player.rect)
-    pygame.display.flip()
-
-# FPS controlling
-    print(clock.tick())
+    # FPS controlling
+    # print(clock.tick())
+    print(life)
     clock.tick(60)
+
+    if life > 0:
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                exit()
+            elif event.type == ADD_ENEMY:
+                new_enemy = Enemy()
+                enemies.add(new_enemy)
+                all_sprites.add(new_enemy)
+
+        # Moving
+        pressed_keys = pygame.key.get_pressed()
+        player.update(pressed_keys)
+        enemies.update()
+
+        # Visualization
+        screen.blit(bg, (0, 0))
+        for entity in all_sprites:
+            screen.blit(entity.surf, entity.rect)
+        pygame.display.flip()
+
+        # Detecting life
+        if pygame.sprite.spritecollideany(player, enemies):
+            player.kill()
+            screen.blit(player.surf, player.rect)
+            life -= 1
+
+    elif life == 0:
+        exit()

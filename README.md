@@ -1,2 +1,2 @@
-# pygame_test
-A personal project for learning how to use pygame.
+# Avoiding Missiles
+A personal project for learning python by coding a game using "pygame".
