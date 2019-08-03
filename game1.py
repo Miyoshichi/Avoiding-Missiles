@@ -1,3 +1,13 @@
+# -*- coding:utf-8 -*-
+
+'''
+pygame Project: Avoiding Missiles
+A personal project for learning python by coding a game using "pygame".
+
+Coder: Ruri
+2019-07-25 ~
+'''
+
 import pygame
 from pygame.locals import *
 from sys import exit
@@ -6,6 +16,7 @@ import random
 # Color defination
 white = (255, 255, 255)
 black = (0, 0, 0)
+red = (255, 0, 0)
 grey = (192, 192, 192)
 skyblue = (135, 206, 250)
 orange = (255, 183, 76)
@@ -63,6 +74,8 @@ screen = pygame.display.set_mode((1080, 720))
 screen.fill(black)
 bg = pygame.Surface(screen.get_size())
 bg.fill(skyblue)
+title_font = pygame.font.SysFont('arial', 60)
+game_over = title_font.render("Game Over!", True, red)
 player = Player()
 clock = pygame.time.Clock()
 life = 3
@@ -80,10 +93,13 @@ pygame.time.set_timer(ADD_ENEMY, 250)
 while 1:
     # FPS controlling
     # print(clock.tick())
-    print(life)
+    # print(life)
     clock.tick(60)
 
+    # Living
     if life > 0:
+        print(life)
+
         for event in pygame.event.get():
             if event.type == QUIT:
                 exit()
@@ -105,9 +121,18 @@ while 1:
 
         # Detecting life
         if pygame.sprite.spritecollideany(player, enemies):
+            print('Defeted')
             player.kill()
-            screen.blit(player.surf, player.rect)
             life -= 1
+            player = Player()
+            all_sprites.add(player)
 
+    # Dead
     elif life == 0:
-        exit()
+
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                exit()
+            else:
+                screen.blit(game_over, (420, 330))
+            pygame.display.flip()
