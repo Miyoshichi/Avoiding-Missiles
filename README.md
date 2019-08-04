@@ -1,9 +1,5 @@
-<center>
 # Avoiding Missiles
-</center>
----
-<center>
-![avater](icon.png)
-</center>
----
+
+![Icon](icon.png)
+
 A personal project for learning python by coding a game using "pygame".
